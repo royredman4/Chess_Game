@@ -1,6 +1,8 @@
 # Chess_Game
 
-This is a GUI chess program that runs purely off of Tkinter. Tkinter is usually included with pythons standard library, so you shouldn't need anything accept for python to run this program. If there is an error that Tkinter is not installed, when you try running it, Tkinters website has some useful information on how to install it (http://www.tkdocs.com/tutorial/install.html). 
+This is a GUI chess program that runs purely off of Tkinter. Tkinter is usually included with pythons standard library, so you shouldn't need anything accept for python to run this program. If there is an error that Tkinter is not installed, when you try running it, Tkinters website has some useful information on how to install it (http://www.tkdocs.com/tutorial/install.html).
+
+In order to run the program, run the GUI.py file (that is the main startup file)
 
 
 I would like to thank Clker.com for the free-to-use 2D Chess art. The exact link to the images I used is here:
