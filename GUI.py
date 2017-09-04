@@ -33,7 +33,7 @@ class ChessGame(Tk):
         
     def Clicked_On_Board(self, event):
         print ("Hello at %s x %s" % (event.x, event.y))
-        self.Toggle.Piece_Clicked(GI.Get_Piece(event.x,event.y))
+        self.Toggle.Piece_Clicked(event.x,event.y)
         
         
 
