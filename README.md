@@ -16,4 +16,8 @@ The basic startup portion of the chess game
 
 
 Toggling the movement options of chess pieces
-![capture2](https://user-images.githubusercontent.com/13859474/30000690-03347942-902a-11e7-9da6-376452f7706f.JPG)
+![capture](https://user-images.githubusercontent.com/13859474/30047786-ccd80d42-91c7-11e7-9411-7586a386c310.JPG)
+
+
+Moving the queen around
+![capture2](https://user-images.githubusercontent.com/13859474/30047787-ccdadcde-91c7-11e7-848e-c913a3e9e4e7.JPG)
