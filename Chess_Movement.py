@@ -79,51 +79,111 @@ class Toggle_Piece(Frame):
             current_coordinates = [self.x, self.y]
             acceptable_moves = []
 
+            if (self.name is "Knight"):
+                if (Directions[i] in ["North", "South", "East", "West"]):
+                    acceptable_moves = self.Knight_Movements(Directions[i])
             
+            elif (self.name is "Pawn"):
+                if (Directions[i] not in ["East", "West"]):
+                    acceptable_moves = self.Pawn_Movements(Directions[i])
 
-            
-            # This indicates how many possible moves the piece can make
-            # In that specific direction
-            for j in range(Moves_dictionary[self.name][i]):
+            else:
+                # This indicates how many possible moves the piece can make
+                # In that specific direction
+                for j in range(Moves_dictionary[self.name][i]):
+                    
+                    if (Directions[i] in ["North", "NorthEast", "NorthWest"]):
+                        if (current_coordinates[1] is 7):
+                            break
+                        else:
+                            current_coordinates[1] += 1
+                    if (Directions[i] in ["East", "NorthEast", "SouthEast"]):
+                        if (current_coordinates[0] is 7):
+                            break
+                        else:
+                            current_coordinates[0] += 1
+                    if (Directions[i] in ["South", "SouthEast", "SouthWest"]):
+                        if (current_coordinates[1] is 0):
+                            break
+                        else:
+                            current_coordinates[1] -= 1
 
-                ################################################################
-                #STILL NEED TO CHECK FOR SPECIAL CASES: Is it a pawn? their first move
-                #As a pawn (two moves). A knight ignores all things that are in its way
-                #accept for its actual spot. Pawns cannot move backwards. Pawns can attack
-                #diagonally only if an enemy is one diagonal move from itself
-                #################################################################
+                    if (Directions[i] in ["West", "SouthWest", "NorthWest"]):
+                        if (current_coordinates[0] is 0):
+                            break
+                        else:
+                            current_coordinates[0] -= 1
 
-                
-                if (Directions[i] in ["North", "NorthEast", "NorthWest"]):
-                    if (current_coordinates[1] is 7):
+                    temp_piece = Chess_Matrix[current_coordinates[0]][current_coordinates[1]]
+                    if ((temp_piece is None) or (temp_piece.color is not self.color)):
+                        acceptable_moves.append([current_coordinates[0], current_coordinates[1]])
+                    if (temp_piece is not None):
                         break
-                    else:
-                        current_coordinates[1] += 1
-                if (Directions[i] in ["East", "NorthEast", "SouthEast"]):
-                    if (current_coordinates[0] is 7):
-                        break
-                    else:
-                        current_coordinates[0] += 1
-                if (Directions[i] in ["South", "SouthEast", "SouthWest"]):
-                    if (current_coordinates[1] is 0):
-                        break
-                    else:
-                        current_coordinates[1] -= 1
-
-                if (Directions[i] in ["West", "SouthWest", "NorthWest"]):
-                    if (current_coordinates[0] is 0):
-                        break
-                    else:
-                        current_coordinates[0] -= 1
-
-                temp_piece = Chess_Matrix[current_coordinates[0]][current_coordinates[1]]
-                if ((temp_piece is None) or (temp_piece.color is not self.color)):
-                    acceptable_moves.append([current_coordinates[0], current_coordinates[1]])
-                if (temp_piece is not None):
-                    break
 
             self.Movement_options[Directions[i]] = acceptable_moves
 
+    # The knight has special rules to its movements, so it needs to be handled seperately
+    def Knight_Movements(self, Direction):
+        Knight_Coordinates = {"North":[[1,2],[-1,2]], "East":[[2,1],[2,-1]],
+                              "South":[[-1,-2],[1,-2]],"West":[[-2,1],[-2,-1]]}
+        possible_moves = []                    
+        for i in range(2):
+            x_coords = self.x + Knight_Coordinates[Direction][i][0]
+            y_coords = self.y + Knight_Coordinates[Direction][i][1]
+            print("X cord is %d and y cord is %d" %(x_coords, y_coords))
+
+            # Checks if the coordinates are outside the chess board boundaries
+            if ((x_coords > -1 and x_coords < 8) and (y_coords > -1 and y_coords < 8)):
+                possible_piece = Get_Piece(x_coords, y_coords)
+                if ((possible_piece is None) or (possible_piece.color is not self.color) ):
+                    possible_moves.append([x_coords, y_coords])
+        return possible_moves
+
+
+    # The pawn has special rules to its movements, so it needs to be handled seperately
+    def Pawn_Movements(self, Direction):
+        Pawn_Coordinates = {"North":[0,1], "South":[0,-1],
+                            "NorthEast":[1,1],"SouthEast":[1,-1],
+                            "NorthWest":[-1,1],"SouthWest":[-1,-1]}
+        
+        Starting_Spots = {"White":1, "Black":6}
+        Legal_Moves = {"White":["North", "NorthEast", "NorthWest"],
+                       "Black":["South", "SouthEast", "SouthWest"]}
+        
+        possible_moves = []
+        if ((self.color is "White" and Direction is "North") or (self.color is "Black" and Direction is "South")):
+            loop_count = 2
+        else:
+            loop_count = 1
+            
+        for i in range(loop_count):
+            if ( ( i is 0) and (Direction in Legal_Moves[self.color]) ):
+                    x = self.x + Pawn_Coordinates[Direction][0]
+                    y = self.y + Pawn_Coordinates[Direction][1]
+                    print("%s Direction coordinates is %s x %s" % (Direction, x, y))
+
+            elif ( (i is 1) and (self.y is Starting_Spots[self.color] and possible_moves) ):
+                    x = self.x + Pawn_Coordinates[Direction][0]
+                    y = self.y + (Pawn_Coordinates[Direction][1] * 2)
+                    print("%s Direction coordinates is %s x %s" % (Direction[i], x, y))
+
+            else:
+                continue
+                
+            print ("Self color is %s and Direction is %s" % (self.color, Direction))
+            if ((x > -1 and x < 8) and (y > -1 and y < 8)):
+                possible_piece = Get_Piece(x, y)
+
+                # Checks if the pawn is going diagonally ONLY when there is an enemy on that spot
+                if ( (Direction not in ["North", "South"]) and (possible_piece is not None) and (self.color is not possible_piece.color) ):
+                    possible_moves.append([x, y])
+                    
+                # Checks if anything is blocking its way    
+                elif ((Direction in ["North", "South"]) and (possible_piece is None)):
+                    possible_moves.append([x, y])
+            
+        return possible_moves
+    
     # Converts the coordinates the user clicked, to the exact index in the Chess_Matrix
     def Coordinates_to_index(self, x_coords, y_coords):
         x_coords = x_coords/60
