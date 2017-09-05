@@ -21,3 +21,6 @@ Toggling the movement options of chess pieces
 
 Moving the queen around
 ![capture2](https://user-images.githubusercontent.com/13859474/30047787-ccdadcde-91c7-11e7-848e-c913a3e9e4e7.JPG)
+
+A rook after destroying some of the opponents pieces
+![capture3](https://user-images.githubusercontent.com/13859474/30048076-4b2b8fba-91c9-11e7-9483-14a0dd73ca69.JPG)
