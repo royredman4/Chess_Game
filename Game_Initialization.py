@@ -8,20 +8,20 @@ except ImportError:
 import os
 
 # Indicates The amount of pieces there are for a single Chess_Piece type
-Piece_count = {"Queen": 1, "King":1, "Rook":2, "Bishop":2,"Knight":2, "Pawn":8}
+Piece_count = {"Queen": 1, "King": 1, "Rook": 2, "Bishop": 2, "Knight": 2, "Pawn": 8}
 
 
 '''
-Organized dictionary by limited movements each piece can travel,All numbers 
-indicate the distance the piece can travel based on the following ordered 
+Organized dictionary by limited movements each piece can travel,All numbers
+indicate the distance the piece can travel based on the following ordered
 directions: N, E, S, W, NE, SE, SW, NW.
 '''
 Moves_dictionary = {"Queen":[8,8,8,8,8,8,8,8],
-                  "King":[1,1,1,1,1,1,1,1],
-                  "Rook":[8,8,8,8,0,0,0,0],
-                  "Bishop":[0,0,0,0,8,8,8,8],
-                  "Knight":[2,2,2,2,0,0,0,0],
-                  "Pawn":[1,0,1,0,1,1,1,1]}
+                    "King":[1,1,1,1,1,1,1,1],
+                    "Rook":[8,8,8,8,0,0,0,0],
+                    "Bishop":[0,0,0,0,8,8,8,8],
+                    "Knight":[2,2,2,2,0,0,0,0],
+                    "Pawn":[1,0,1,0,1,1,1,1]}
 
 # The matrix that manages the Chess piece objects on the board
 Chess_Matrix = [[None for x in range(8)] for y in range(8)]
@@ -29,18 +29,21 @@ Chess_Matrix = [[None for x in range(8)] for y in range(8)]
 # The matrix that manages the chessboard color objects for each piece
 Board_Colors = [[None for x in range(8)] for y in range(8)]
 
+
 # Manages each square of the chessboard based on its background color
 class Board_Settings():
     def __init__(self, canvas, def_color, rectangle):
         self.canvas = canvas
         self.default_color = def_color
         self.rectangle_object = rectangle
+        
     def Set_Color(self, color):
-        self.canvas.itemconfig(self.rectangle_object, fill = color)
+        self.canvas.itemconfig(self.rectangle_object, fill=color)
 
     def Reset_Color(self):
-        self.canvas.itemconfig(self.rectangle_object, fill = self.default_color)
-        
+        self.canvas.itemconfig(self.rectangle_object, fill=self.default_color)
+
+
 # The master chess class that overwatches all chess pieces
 class Chess_Set(Frame):
     def __init__(self, canvas):
@@ -49,8 +52,9 @@ class Chess_Set(Frame):
         self.White_Pieces = Chess_Managers("White", self.canvas)
         self.Black_Pieces = Chess_Managers("Black", self.canvas)
         Print_Matrix()
-        
-# Manages every chess piece for its group ("White"/"Black" chess pieces) 
+
+
+# Manages every chess piece for its group ("White"/"Black" chess pieces)
 class Chess_Managers():
     def __init__(self, color, canvas):
         self.Chess_color = color
@@ -59,11 +63,11 @@ class Chess_Managers():
         
     def Create_Pieces(self, canvas):
         if (self.Chess_color is "White"):
-            y_coords =  0
-            next_row =  1
+            y_coords = 0
+            next_row = 1
         else:
-            y_coords =  7
-            next_row =  6
+            y_coords = 7
+            next_row = 6
 
         x_index = 0
         for key in ["Rook", "Knight", "Bishop", "Queen", "King", "Pawn"]:
@@ -72,7 +76,7 @@ class Chess_Managers():
                     y_coords = next_row
                     x_index = 0
 
-            #Creates every chess piece
+            # Creates every chess piece
             for i in range(0, Piece_count[key], 2):
                 x_coords = x_index
                 current_index = [x_coords, y_coords]
@@ -92,7 +96,8 @@ class Chess_Managers():
                     Update_ChessMatrix(self.Chess_items[-1])
                     
                 x_index += 1
-    
+
+
 # Manages a single chess pieces attributes
 class Chess_Piece():
     def __init__(self, name, color, coordinates, canvas):
@@ -136,6 +141,7 @@ class Chess_Piece():
         print("Deleting Piece Image")
         self.canvas.delete(self.img_Obj)
 
+
 # Creates the whole ChessBoard from scratch
 def Draw_ChessBoard(canvas):
     f = ["dark gray", "white"]
@@ -148,25 +154,26 @@ def Draw_ChessBoard(canvas):
             temp = canvas.create_rectangle(x, 480-y, x+60, 480-(y+60), fill=f[p])
             Board_Colors[q][z] = Board_Settings(canvas, f[p], temp)
 
-            print("x:%d y:%d is %s" %(q, z, f[p]))
+            print("x:%d y:%d is %s" % (q, z, f[p]))
             p = not p
             x += 60
         f.reverse()
         y += 60
 
+
 # Updates the matrix, to reflect a chess piece moving
-def Update_ChessMatrix(chess_piece, old_coords= None):
+def Update_ChessMatrix(chess_piece, old_coords=None):
     new_x = chess_piece.x_coords
     new_y = chess_piece.y_coords
-    print("Moving chess piece to %s x %s" %(new_x, new_y))
+    print("Moving chess piece to %s x %s" % (new_x, new_y))
     Chess_Matrix[new_x][new_y] = chess_piece
     if old_coords:
         old_x = old_coords[0]
         old_y = old_coords[1]
         Chess_Matrix[old_x][old_y] = None
         print("Old Coordinates were %s and the new coordinates are %s" % ([old_x, old_y], [new_x, new_y]))
-
         (Board_Colors[old_x][old_y]).Reset_Color()
+
 
 # Outputs all the chess pieces neatly onto the console (for debugging purposes)
 def Print_Matrix():
@@ -174,13 +181,14 @@ def Print_Matrix():
         for x in range(8):
             if Chess_Matrix[x][y]:
                 if ((Chess_Matrix[x][y]).Piece_name is "King"):
-                    piece_initial ="Ki "
+                    piece_initial = "Ki "
                 else:
                     piece_initial = (Chess_Matrix[x][y]).Piece_name[0] + "  "
                 print (piece_initial),
             else:
                 print ("   "),
         print (" ")
+
 
 # Returns either the chess piece at the coordinates, or None if nothing is there
 def Get_Piece(x_coord, y_coord):
