@@ -62,6 +62,7 @@ class Chess_Managers():
         self.Create_Pieces(canvas)
         
     def Create_Pieces(self, canvas):
+        import Chess_Pieces
         if (self.Chess_color is "White"):
             y_coords = 0
             next_row = 1
@@ -75,13 +76,15 @@ class Chess_Managers():
             if (key is "Pawn"):
                     y_coords = next_row
                     x_index = 0
-
+            
             # Creates every chess piece
             for i in range(0, Piece_count[key], 2):
                 x_coords = x_index
                 current_index = [x_coords, y_coords]
                 print("current_index is %s" % current_index)
-                self.Chess_items.append(Chess_Piece(key, self.Chess_color, current_index, canvas))
+                Piece = getattr(Chess_Pieces, key)
+                self.Chess_items.append(Piece(self.Chess_color, current_index, canvas))
+                #self.Chess_items.append(Chess_Piece(key, self.Chess_color, current_index, canvas))
                 Update_ChessMatrix(self.Chess_items[-1])
 
                 '''
@@ -92,54 +95,10 @@ class Chess_Managers():
                     x_coords = 7 - x_index
                     current_index = [x_coords, y_coords]
                     print("Next coordinates are %s" % (current_index))
-                    self.Chess_items.append(Chess_Piece(key, self.Chess_color, current_index, canvas))
+                    self.Chess_items.append(Piece(self.Chess_color, current_index, canvas))
                     Update_ChessMatrix(self.Chess_items[-1])
                     
                 x_index += 1
-
-
-# Manages a single chess pieces attributes
-class Chess_Piece():
-    def __init__(self, name, color, coordinates, canvas):
-        self.Piece_name = name
-        self.Attack_Moves = Moves_dictionary[name]
-        self.color = color
-        self.x_coords = coordinates[0]
-        self.y_coords = coordinates[1]
-        self.canvas = canvas
-        self.image = None
-        self.img_Obj = None
-        self.Create_Piece()
-            
-        self.hop = False
-        self.Diagonal = False
-        
-        if (name is "Knight"):
-            self.hop = True
-
-        elif (name is "Pawn"):
-            self.diagonal = True
-
-    def Create_Piece(self):
-        x = self.x_coords
-        y = self.y_coords
-        img_location = os.getcwd() + "/Chess_Pieces/%s_Pieces/%s_%s.GIF" %(self.color, self.color, self.Piece_name)
-        self.image = PhotoImage(file=img_location)
-        self.img_Obj = self.canvas.create_image((30+(x *60)), 450-(y * 60), image = self.image)
-
-    def Move_Piece(self, new_x, new_y):
-        x = (new_x - self.x_coords) * 60
-        y = (self.y_coords - new_y) * 60
-        print("Moving x by %d and y by %d" % (x, y))
-        self.canvas.move(self.img_Obj, x, y)
-
-        self.x_coords = new_x
-        self.y_coords = new_y
-
-    # When this piece is destroyed in the game, then remove its image object
-    def Remove_Piece(self):
-        print("Deleting Piece Image")
-        self.canvas.delete(self.img_Obj)
 
 
 # Creates the whole ChessBoard from scratch
