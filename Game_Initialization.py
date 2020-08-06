@@ -122,8 +122,8 @@ def Draw_ChessBoard(canvas):
 
 # Updates the matrix, to reflect a chess piece moving
 def Update_ChessMatrix(chess_piece, old_coords=None):
-    new_x = chess_piece.x_coords
-    new_y = chess_piece.y_coords
+    new_x, new_y = chess_piece.coordinates
+    
     print("Moving chess piece to %s x %s" % (new_x, new_y))
     Chess_Matrix[new_x][new_y] = chess_piece
     if old_coords:

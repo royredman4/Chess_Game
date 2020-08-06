@@ -6,17 +6,41 @@ except ImportError:
     from tkinter import *
 
 import os
-    
+
 Infinite_Movement = 1000
 
 
 class Chess_Piece_Movement:
     
-    def __init__(self, movements):
+    def __init__(self, movements, piece_coordinates):
         self.movement = movements
-    
-    def move(self):
-        pass
+        self.piece_coordinates = piece_coordinates
+        self.movement_coordinates = None
+        self.update_move_coordinates(piece_coordinates[:])
+        
+    def update_move_coordinates(self, current_coords):
+        for move in self.movement:
+            for direction in move:
+                if ("North" in direction):
+                    current_coords[1] += move[direction]
+                if("South" in direction):
+                    current_coords[1] -= move[direction]
+                if("East" in direction):
+                    current_coords[0] += move[direction]
+                if ("West" in direction):
+                    current_coords[0] -= move[direction]
+                    
+        self.movement_coordinates = current_coords
+        x,y = current_coords
+        self.OutOfBounds = self.Is_OutOfBounds()
+            
+                
+    def Is_OutOfBounds(self):
+        x,y = self.movement_coordinates
+        if (0 <= x < 8):
+            if (0 <= y < 8):
+                return False
+        return True         
     
     def show_move(self):
         pass
@@ -34,7 +58,7 @@ class Chess_Piece:
         else:
             self.negate_coordinates = False
             
-        self.x_coords, self.y_coords = coordinates
+        self.coordinates = coordinates
         self.canvas = canvas
         self.image = None
         self.img_Obj = None
@@ -46,7 +70,7 @@ class Chess_Piece:
         self.move_counts = 0
         
     def Create_Piece(self):
-        x,y = self.x_coords, self.y_coords
+        x,y = self.coordinates
         img_location = os.getcwd() + "/Chess_Pieces/%s_Pieces/%s_%s.GIF" %(self.color, self.color, self.Piece_name)
         self.image = PhotoImage(file=img_location)
         self.img_Obj = self.canvas.create_image((30+(x *60)), 450-(y * 60), image = self.image)
@@ -56,13 +80,12 @@ class Chess_Piece:
         self.canvas.delete(self.img_Obj)
         
     def Move_Piece(self, new_x, new_y):
-        x = (new_x - self.x_coords) * 60
-        y = (self.y_coords - new_y) * 60
+        x = (new_x - self.coordinates[0]) * 60
+        y = (self.coordinates[1] - new_y) * 60
         print("Moving x by %d and y by %d" % (x, y))
         self.canvas.move(self.img_Obj, x, y)
 
-        self.x_coords = new_x
-        self.y_coords = new_y
+        self.coordinates = [new_x, new_y]
     
     
     def add_move(self, direction, piece_movements):
@@ -71,7 +94,7 @@ class Chess_Piece:
                 for direction in movement:
                     movement[direction] *= -1
                 
-        self.moves[direction].append(Chess_Piece_Movement(piece_movements))
+        self.moves[direction].append(Chess_Piece_Movement(piece_movements, self.coordinates))
     
     def show_movements(self):
         for direction in self.moves.keys():
@@ -90,9 +113,14 @@ class Pawn(Chess_Piece):
         
         self.add_move("North", [{"North":1}])
         
-        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement([{"North":1}, {"East":1}]))
-        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement([{"North":1}, {"East":1}]))
-        self.Special_Moves["North"].append(Chess_Piece_Movement([{"North":2}]))
+        if(color is "Black"):
+            multiplier = -1
+        else:
+            multiplier = 1
+            
+        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement([{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
+        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement([{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
+        self.Special_Moves["North"].append(Chess_Piece_Movement([{"North":2*multiplier}], coordinates))
         
         
         
@@ -117,6 +145,7 @@ class Knight(Chess_Piece):
         self.add_move("South", [{"South":2}, {"West":1}])
         self.add_move("West", [{"West":2}, {"North":1}])
         self.add_move("West", [{"West":2}, {"South":1}])
+        
         
         
 class Bishop(Chess_Piece):

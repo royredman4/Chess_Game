@@ -83,8 +83,7 @@ class Toggle_Piece(Frame):
                 self.Show_Hide_Movement("Yellow")
 
     def Store_Piece_Information(self, piece):
-        self.x = piece.x_coords
-        self.y = piece.y_coords
+        self.x,self.y = piece.coordinates
         self.name = piece.Piece_name
         self.color = piece.color
         self.piece = piece
