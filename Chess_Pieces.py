@@ -14,12 +14,14 @@ class Chess_Piece_Movement:
     
     
 class Chess_Piece:
-    def __init__(self, name, color):
+    def __init__(self, name, color, coordinates):
         _color = color
         if (_color == "Black"):
             negate_coordinates = True
         else:
             negate_coordinates = False
+            
+        current_coordinates = coordinates
             
         piece_name = name
         moves = {"North":[],"East":[],"South":[],"West":[],
@@ -43,8 +45,8 @@ class Chess_Piece:
     
     
 class Pawn(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "Pawn", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "Pawn", color, coordinates)
         Special_Moves = moves.copy()
         
         add_move("North", [{"North":1}])
@@ -57,8 +59,8 @@ class Pawn(Chess_Piece):
         
 
 class Rook(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "Rook", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "Rook", color, coordinates)
         add_move("North", [{"North":Infinite_Movement}])
         add_move("East", [{"East":Infinite_Movement}])
         add_move("South", [{"South":Infinite_Movement}])
@@ -66,8 +68,8 @@ class Rook(Chess_Piece):
         
 
 class Knight(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "Knight", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "Knight", color, coordinates)
         add_move("North", [{"North":2}, {"East":1}])
         add_move("North", [{"North":2}, {"West":1}])
         add_move("East", [{"East":2}, {"North":1}])
@@ -79,16 +81,16 @@ class Knight(Chess_Piece):
         
         
 class Bishop(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "Bishop", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "Bishop", color, coordinates)
         add_move("NorthEast", [{"NorthEast":Infinite_Movement}])
         add_move("NorthWest", [{"NorthWest":Infinite_Movement}])
         add_move("SouthEast", [{"SouthEast":Infinite_Movement}])
         add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
         
 class Queen(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "Queen", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "Queen", color, coordinates)
         add_move("North", [{"North":Infinite_Movement}])
         add_move("East", [{"East":Infinite_Movement}])
         add_move("South", [{"South":Infinite_Movement}])
@@ -99,8 +101,8 @@ class Queen(Chess_Piece):
         add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
         
 class King(Chess_Piece):
-    def __init__(self, color):
-        Chess_Piece.__init__(self, "King", color)
+    def __init__(self, color, coordinates):
+        Chess_Piece.__init__(self, "King", color, coordinates)
         add_move("North", [{"North":1}])
         add_move("East", [{"East":1}])
         add_move("South", [{"South":1}])
