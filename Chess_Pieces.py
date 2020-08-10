@@ -1,3 +1,4 @@
+
 try:
     # for Python2
     from Tkinter import *
@@ -7,16 +8,22 @@ except ImportError:
 
 import os
 
+from Game_Initialization import Chess_Matrix, Board_Colors
+from Chess_Movement import Show_Hide_Movement
 Infinite_Movement = 1000
+
 
 
 class Chess_Piece_Movement:
     
-    def __init__(self, movements, piece_coordinates):
+    def __init__(self, color, movements, piece_coordinates):
         self.movement = movements
+        self.color = color
         self.piece_coordinates = piece_coordinates
         self.movement_coordinates = None
         self.update_move_coordinates(piece_coordinates[:])
+        self.OutOfBounds = False
+        self.IsBlocked = False
         
     def update_move_coordinates(self, current_coords):
         for move in self.movement:
@@ -33,7 +40,7 @@ class Chess_Piece_Movement:
         self.movement_coordinates = current_coords
         x,y = current_coords
         self.OutOfBounds = self.Is_OutOfBounds()
-            
+        self.IsBlocked = self.Is_Blocked()
                 
     def Is_OutOfBounds(self):
         x,y = self.movement_coordinates
@@ -41,18 +48,42 @@ class Chess_Piece_Movement:
             if (0 <= y < 8):
                 return False
         return True         
-    
+
+    def Is_Blocked(self):
+        x,y = self.movement_coordinates
+        IsBlocked = False
+        isOccupied = Chess_Matrix[x][y]
+        if (isOccupied == None):
+            return False
+        elif (isOccupied.color() != self.color()):
+            return False
+        else:
+            IsBlocked = True
+            return True
+        
+        
+        
     def show_move(self):
-        pass
+        self.update_move_coordinates(self.piece_coordinates[:])
+        if (self.OutOfBounds or self.IsBlocked):
+            return False
+        
+        else:
+            x,y = self.movement_coordinates
+            Board_Colors[x][y].Set_Color("yellow")
+            return True  
     
     def hide_move(self):
-        pass
+        x,y = self.movement_coordinates
+        Board_Colors[x][y].Reset_Color()
     
     
 class Chess_Piece:
     def __init__(self, name, color, coordinates, canvas):
         self.Piece_name = name
         self.color = color
+        self.Movements_Shown = False
+        
         if (self.color == "Black"):
             self.negate_coordinates = True
         else:
@@ -89,22 +120,31 @@ class Chess_Piece:
     
     
     def add_move(self, direction, piece_movements):
+        if (len(piece_movements) == 1 and piece_movements[0].values()[0] == Infinite_Movement):
+            direction = piece_movements[0].keys()[0]
+            for i in range(1,8):
+                self.add_move(direction, [{direction:i}])
+            
         if self.negate_coordinates:
             for movement in piece_movements:
                 for direction in movement:
                     movement[direction] *= -1
                 
-        self.moves[direction].append(Chess_Piece_Movement(piece_movements, self.coordinates))
+        self.moves[direction].append(Chess_Piece_Movement(self.color, piece_movements, self.coordinates))
     
     def show_movements(self):
         for direction in self.moves.keys():
             for coordinate in direction:
                 coordinate.show_move()
+                
+        self.Movements_Shown = True
             
     def hide_movements(self):
         for direction in self.moves.keys():
             for coordinate in direction:
                 coordinate.hide_move()
+                
+        self.Movements_Shown = False
     
 class Pawn(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
@@ -118,9 +158,9 @@ class Pawn(Chess_Piece):
         else:
             multiplier = 1
             
-        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement([{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
-        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement([{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
-        self.Special_Moves["North"].append(Chess_Piece_Movement([{"North":2*multiplier}], coordinates))
+        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement(color, [{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
+        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement(color, [{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
+        self.Special_Moves["North"].append(Chess_Piece_Movement(color, [{"North":2*multiplier}], coordinates))
         
         
         
@@ -132,6 +172,7 @@ class Rook(Chess_Piece):
         self.add_move("East", [{"East":Infinite_Movement}])
         self.add_move("South", [{"South":Infinite_Movement}])
         self.add_move("West", [{"West":Infinite_Movement}])
+        
         
 
 class Knight(Chess_Piece):
@@ -147,7 +188,6 @@ class Knight(Chess_Piece):
         self.add_move("West", [{"West":2}, {"South":1}])
         
         
-        
 class Bishop(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
         Chess_Piece.__init__(self, "Bishop", color, coordinates, canvas)
@@ -155,6 +195,7 @@ class Bishop(Chess_Piece):
         self.add_move("NorthWest", [{"NorthWest":Infinite_Movement}])
         self.add_move("SouthEast", [{"SouthEast":Infinite_Movement}])
         self.add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
+        
         
 class Queen(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
@@ -167,6 +208,7 @@ class Queen(Chess_Piece):
         self.add_move("NorthWest", [{"NorthWest":Infinite_Movement}])
         self.add_move("SouthEast", [{"SouthEast":Infinite_Movement}])
         self.add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
+        
         
 class King(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
