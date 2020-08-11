@@ -9,16 +9,15 @@ except ImportError:
 import os
 
 from Game_Initialization import Chess_Matrix, Board_Colors
-from Chess_Movement import Show_Hide_Movement
 Infinite_Movement = 1000
 
 
 
 class Chess_Piece_Movement:
     
-    def __init__(self, color, movements, piece_coordinates):
+    def __init__(self, chess_piece, movements, piece_coordinates):
         self.movement = movements
-        self.color = color
+        self.chess_piece = chess_piece
         self.piece_coordinates = piece_coordinates
         self.movement_coordinates = None
         self.update_move_coordinates(piece_coordinates[:])
@@ -40,8 +39,10 @@ class Chess_Piece_Movement:
         self.movement_coordinates = current_coords
         x,y = current_coords
         self.OutOfBounds = self.Is_OutOfBounds()
-        self.IsBlocked = self.Is_Blocked()
-                
+        if (not self.OutOfBounds):
+            self.IsBlocked = self.Is_Blocked()
+        else:
+            self.IsBlocked = True    
     def Is_OutOfBounds(self):
         x,y = self.movement_coordinates
         if (0 <= x < 8):
@@ -52,10 +53,12 @@ class Chess_Piece_Movement:
     def Is_Blocked(self):
         x,y = self.movement_coordinates
         IsBlocked = False
-        isOccupied = Chess_Matrix[x][y]
+        
+        isOccupied = Chess_Matrix[x][y]    
+            
         if (isOccupied == None):
             return False
-        elif (isOccupied.color() != self.color()):
+        elif (isOccupied.color != self.chess_piece.color):
             return False
         else:
             IsBlocked = True
@@ -122,15 +125,17 @@ class Chess_Piece:
     def add_move(self, direction, piece_movements):
         if (len(piece_movements) == 1 and piece_movements[0].values()[0] == Infinite_Movement):
             direction = piece_movements[0].keys()[0]
+            
             for i in range(1,8):
                 self.add_move(direction, [{direction:i}])
+            return
             
         if self.negate_coordinates:
             for movement in piece_movements:
                 for direction in movement:
                     movement[direction] *= -1
                 
-        self.moves[direction].append(Chess_Piece_Movement(self.color, piece_movements, self.coordinates))
+        self.moves[direction].append(Chess_Piece_Movement(self, piece_movements, self.coordinates))
     
     def show_movements(self):
         for direction in self.moves.keys():
@@ -158,9 +163,9 @@ class Pawn(Chess_Piece):
         else:
             multiplier = 1
             
-        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement(color, [{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
-        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement(color, [{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
-        self.Special_Moves["North"].append(Chess_Piece_Movement(color, [{"North":2*multiplier}], coordinates))
+        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement(self, [{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
+        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement(self, [{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
+        self.Special_Moves["North"].append(Chess_Piece_Movement(self, [{"North":2*multiplier}], coordinates))
         
         
         
