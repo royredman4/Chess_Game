@@ -6,6 +6,7 @@ except ImportError:
     from tkinter import *
 
 from Game_Initialization import Chess_Matrix, Board_Colors, Moves_dictionary, Get_Piece, Update_ChessMatrix
+from Chess_Pieces import Chess_Piece
 
 #x_let = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7}
 #y_let = {"1":0, "2":1, "3":2, "4":3, "5":4, "6":5, "7":6, "8":7}
@@ -22,6 +23,8 @@ class Toggle_Piece(Frame):
         self.Players_Colors = ["Black", "White"]
         self.Player_One_Turn = True
         self.Movement_options = {}
+        self.current_clicked_piece = None
+        self.Movements_Shown = False
 
     '''
     If the user clicked on a chess piece, it will display the options a user could move.
@@ -36,52 +39,40 @@ class Toggle_Piece(Frame):
 
 
         print ("It is player %s turn" % (self.Players_Colors[self.Player_One_Turn]))
-	
-
-        print("Chess piece is %s and Movement Options are %s" % (chess_piece, self.move_options))
         
-        # Checks if the user clicked on the chess board after the movement options were displayed
-        if self.move_options is True:
-            self.move_options = False
-            self.Show_Hide_Movement()
-
-            # Checks to see if the player clicked on an actual movement option
-            for key in Directions:
-                for i in range(len(self.Movement_options[key])):
-                    list = self.Movement_options[key][i]
-                    print("Seeing if %s and %s are the same" % (list, current_coords))
-
-                    # If the clicked coordinates and the movement coordinates are the same
-                    if list == current_coords:
-                        print("They are the same!! :D")
-                        enemy_check = Get_Piece(current_coords[0], current_coords[1])
-
-                        # Identifies if you are destroying an enemy piece in the process of moving
-                        if (enemy_check):
-                            self.Delete_Piece(current_coords[0], current_coords[1])
-                            
-                        self.piece.Move_Piece(current_coords[0], current_coords[1])
-                        Update_ChessMatrix(self.piece, [self.x, self.y])
-                        self.Player_One_Turn = not self.Player_One_Turn
-                        return self.Players_Colors[self.Player_One_Turn]
-
-        else:
-            # Checks if the user clicked on a chess piece or not
-            if chess_piece:
-                # Need to check if the chess piece is a NoneType or not
-                if (self.Players_Colors[self.Player_One_Turn] is not chess_piece.color):
-                    return
+        
+        
+        # If it's not the current chess piece, then check if it's the shown movement
+        if (isinstance(chess_piece, Chess_Piece) == False or (self.Players_Colors[self.Player_One_Turn] is not chess_piece.color)):
+            if self.current_clicked_piece and self.current_clicked_piece.Movements_Shown and self.current_clicked_piece.Move_Chosen(current_coords[0], current_coords[1]):
+                self.current_clicked_piece.Move_Piece(current_coords[0], current_coords[1])
+                self.Player_One_Turn = not self.Player_One_Turn
+                self.current_clicked_piece = None
+                return self.Players_Colors[self.Player_One_Turn]
                 
-                print("%s and is %s" % (chess_piece.Piece_name, chess_piece.color))
-                self.Store_Piece_Information(chess_piece)
-                self.Movement_Options()
-                print("Movement options are %s" % (self.Movement_options))
-
-		# If there movement options, then set as True, otherwise False
-                self.move_options = self.Movement_Check()
-
-                self.Show_Hide_Movement("Yellow")
-
+            
+            elif self.current_clicked_piece:
+                self.current_clicked_piece.hide_movements()
+                self.current_clicked_piece = None
+                
+        # If it is a chess piece, check if it's our players chess piece
+        elif (self.Players_Colors[self.Player_One_Turn] is chess_piece.color):
+            print("Chess piece is %s and Movement Options are %s" % (chess_piece.Piece_name, chess_piece.moves))
+            if (self.current_clicked_piece):
+                self.current_clicked_piece.hide_movements() 
+                
+            self.current_clicked_piece = chess_piece
+            self.current_clicked_piece.update_moves_list()
+            self.current_clicked_piece.show_movements()
+        
+        # If it's neither of those, hide any movements
+        else:
+            if (self.current_clicked_piece):
+                self.current_clicked_piece.hide_movements()
+                self.current_clicked_piece = None    
+        
+        
+        
     def Store_Piece_Information(self, piece):
         self.x,self.y = piece.coordinates
         self.name = piece.Piece_name

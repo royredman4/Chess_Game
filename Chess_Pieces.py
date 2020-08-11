@@ -23,8 +23,12 @@ class Chess_Piece_Movement:
         self.update_move_coordinates(piece_coordinates[:])
         self.OutOfBounds = False
         self.IsBlocked = False
+        self.EnemyHit = False
         
-    def update_move_coordinates(self, current_coords):
+    def update_move_coordinates(self, current_coords=None):
+        if current_coords == None:
+            current_coords = self.piece_coordinates[:]
+            
         for move in self.movement:
             for direction in move:
                 if ("North" in direction):
@@ -40,34 +44,39 @@ class Chess_Piece_Movement:
         x,y = current_coords
         self.OutOfBounds = self.Is_OutOfBounds()
         if (not self.OutOfBounds):
-            self.IsBlocked = self.Is_Blocked()
+            if (not self.Is_Blocked()):
+                return self
         else:
-            self.IsBlocked = True    
+            self.IsBlocked = True
+              
     def Is_OutOfBounds(self):
         x,y = self.movement_coordinates
         if (0 <= x < 8):
             if (0 <= y < 8):
                 return False
-        return True         
+        return True
+        
 
     def Is_Blocked(self):
         x,y = self.movement_coordinates
-        IsBlocked = False
+        self.IsBlocked = False
         
         isOccupied = Chess_Matrix[x][y]    
             
         if (isOccupied == None):
-            return False
+            self.IsBlocked = False
         elif (isOccupied.color != self.chess_piece.color):
-            return False
+            self.IsBlocked = False
+            self.EnemyHit = True
+            
         else:
-            IsBlocked = True
-            return True
+            self.IsBlocked = True
+        return self.IsBlocked
         
         
         
     def show_move(self):
-        self.update_move_coordinates(self.piece_coordinates[:])
+        #self.update_move_coordinates(self.piece_coordinates[:])
         if (self.OutOfBounds or self.IsBlocked):
             return False
         
@@ -86,6 +95,7 @@ class Chess_Piece:
         self.Piece_name = name
         self.color = color
         self.Movements_Shown = False
+        self.possible_moves = []
         
         if (self.color == "Black"):
             self.negate_coordinates = True
@@ -110,18 +120,50 @@ class Chess_Piece:
         self.img_Obj = self.canvas.create_image((30+(x *60)), 450-(y * 60), image = self.image)
         
     def Remove_Piece(self):
-        print("Deleting Piece Image")
+        print("Deleting Piece Image for {}:{}".format(self.color, self.Piece_name))
         self.canvas.delete(self.img_Obj)
         
     def Move_Piece(self, new_x, new_y):
+        Chess_Matrix[self.coordinates[0]][self.coordinates[1]] = None
+        enemy = Chess_Matrix[new_x][new_y]
+        if (enemy and enemy.color != self.color):
+            enemy.Remove_Piece()
+            
         x = (new_x - self.coordinates[0]) * 60
         y = (self.coordinates[1] - new_y) * 60
         print("Moving x by %d and y by %d" % (x, y))
         self.canvas.move(self.img_Obj, x, y)
 
-        self.coordinates = [new_x, new_y]
+        self.coordinates[0], self.coordinates[1] = new_x, new_y
+        Chess_Matrix[new_x][new_y] = self
+        
+        self.hide_movements()
+        del self.possible_moves[:]
+        self.Movements_Shown = False
+        
+        self.update_moves_list()
     
+    def Move_Chosen(self, x,y):
+        for movement in self.possible_moves:
+            if movement.movement_coordinates == [x,y]:
+                return True
+            
+        return False
     
+    def update_moves_list(self):
+        del self.possible_moves[:]
+        for movement in self.moves:
+            if (len(self.moves[movement]) == 0):
+                continue
+            for move in self.moves[movement]:         
+                potential_move = move.update_move_coordinates()
+                if potential_move:
+                    self.possible_moves.append(potential_move)
+                    if potential_move.EnemyHit:
+                        break
+                else:
+                    break
+        
     def add_move(self, direction, piece_movements):
         if (len(piece_movements) == 1 and piece_movements[0].values()[0] == Infinite_Movement):
             direction = piece_movements[0].keys()[0]
@@ -138,16 +180,14 @@ class Chess_Piece:
         self.moves[direction].append(Chess_Piece_Movement(self, piece_movements, self.coordinates))
     
     def show_movements(self):
-        for direction in self.moves.keys():
-            for coordinate in direction:
-                coordinate.show_move()
+        for move in self.possible_moves:
+            move.show_move()
                 
         self.Movements_Shown = True
             
     def hide_movements(self):
-        for direction in self.moves.keys():
-            for coordinate in direction:
-                coordinate.hide_move()
+        for move in self.possible_moves:
+            move.hide_move()
                 
         self.Movements_Shown = False
     
