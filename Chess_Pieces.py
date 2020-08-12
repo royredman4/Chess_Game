@@ -1,3 +1,4 @@
+from pip._internal.utils.outdated import SELFCHECK_DATE_FMT
 
 try:
     # for Python2
@@ -7,10 +8,10 @@ except ImportError:
     from tkinter import *
 
 import os
+import copy
 
 from Game_Initialization import Chess_Matrix, Board_Colors
 Infinite_Movement = 1000
-
 
 
 class Chess_Piece_Movement:
@@ -42,8 +43,7 @@ class Chess_Piece_Movement:
                     
         self.movement_coordinates = current_coords
         x,y = current_coords
-        self.OutOfBounds = self.Is_OutOfBounds()
-        if (not self.OutOfBounds):
+        if (not self.Is_OutOfBounds()):
             if (not self.Is_Blocked()):
                 return self
         else:
@@ -51,26 +51,32 @@ class Chess_Piece_Movement:
               
     def Is_OutOfBounds(self):
         x,y = self.movement_coordinates
+        self.OutOfBounds = True
+        
         if (0 <= x < 8):
             if (0 <= y < 8):
-                return False
-        return True
+                self.OutOfBounds = False
+                
+        return self.OutOfBounds
         
 
     def Is_Blocked(self):
         x,y = self.movement_coordinates
         self.IsBlocked = False
+        self.EnemyHit = False
         
         isOccupied = Chess_Matrix[x][y]    
             
         if (isOccupied == None):
             self.IsBlocked = False
+            
         elif (isOccupied.color != self.chess_piece.color):
             self.IsBlocked = False
             self.EnemyHit = True
             
         else:
             self.IsBlocked = True
+            
         return self.IsBlocked
         
         
@@ -94,6 +100,7 @@ class Chess_Piece:
     def __init__(self, name, color, coordinates, canvas):
         self.Piece_name = name
         self.color = color
+        self.movement_counter = 0
         self.Movements_Shown = False
         self.possible_moves = []
         
@@ -136,6 +143,7 @@ class Chess_Piece:
 
         self.coordinates[0], self.coordinates[1] = new_x, new_y
         Chess_Matrix[new_x][new_y] = self
+        self.movement_counter += 1
         
         self.hide_movements()
         del self.possible_moves[:]
@@ -163,6 +171,12 @@ class Chess_Piece:
                         break
                 else:
                     break
+    def enemy_present(self, coordinates):
+        x,y = coordinates
+        possible_enemy = Chess_Matrix[x][y]
+        if (isinstance(possible_enemy, Chess_Piece) and possible_enemy.color != self.color):
+            return True
+        return False
         
     def add_move(self, direction, piece_movements):
         if (len(piece_movements) == 1 and piece_movements[0].values()[0] == Infinite_Movement):
@@ -191,23 +205,43 @@ class Chess_Piece:
                 
         self.Movements_Shown = False
     
+    
+    
 class Pawn(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
         Chess_Piece.__init__(self, "Pawn", color, coordinates, canvas)
-        self.Special_Moves = self.moves.copy()
+
+        self.backup_moves = copy.deepcopy(self.moves)
         
-        self.add_move("North", [{"North":1}])
+    
         
-        if(color is "Black"):
+    def update_moves_list(self):
+        if(self.negate_coordinates):
             multiplier = -1
         else:
             multiplier = 1
             
-        self.Special_Moves["NorthEast"].append(Chess_Piece_Movement(self, [{"North":1*multiplier}, {"East":1*multiplier}], coordinates))
-        self.Special_Moves["NorthWest"].append(Chess_Piece_Movement(self, [{"North":1*multiplier}, {"West":1*multiplier}], coordinates))
-        self.Special_Moves["North"].append(Chess_Piece_Movement(self, [{"North":2*multiplier}], coordinates))
+        self.moves = copy.deepcopy(self.backup_moves)
+        x,y = self.coordinates
+        
+        if (self.enemy_present([x,y+multiplier]) == False):
+            self.add_move("North", [{"North":1}])
+        
+        if (self.enemy_present([x+multiplier,y+multiplier])):
+            self.add_move("NorthEast", [{"North":1}, {"East":1}])
+            
+        if (self.enemy_present([x-multiplier,y+multiplier])):
+            self.add_move("NorthWest", [{"North":1}, {"West":1}])
         
         
+        if (self.movement_counter > 0):
+            Chess_Piece.update_moves_list(self)
+        else:
+            if (self.enemy_present([x,y+(2*multiplier)]) == False and len(self.moves["North"]) == 1):
+                self.add_move("North", [{"North":2}])
+                
+            Chess_Piece.update_moves_list(self)
+            self.moves = copy.deepcopy(self.backup_moves)
         
 
 class Rook(Chess_Piece):
@@ -232,6 +266,16 @@ class Knight(Chess_Piece):
         self.add_move("West", [{"West":2}, {"North":1}])
         self.add_move("West", [{"West":2}, {"South":1}])
         
+    def update_moves_list(self):
+        del self.possible_moves[:]
+        for movement in self.moves:
+            if (len(self.moves[movement]) == 0):
+                continue
+            for move in self.moves[movement]:         
+                potential_move = move.update_move_coordinates()
+                if potential_move:
+                    self.possible_moves.append(potential_move)
+                
         
 class Bishop(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
