@@ -18,6 +18,15 @@ Chess_Matrix = [[None for x in range(8)] for y in range(8)]
 Board_Colors = [[None for x in range(8)] for y in range(8)]
 
 
+class Attack_Obj:
+    def __init__(self):
+        self.Chess_Piece = None
+        self.EnemyMovementsToSpot = []
+        
+# Chess Piece attack layouts for each side
+White_Attack_Layout = [[Attack_Obj for x in range(8)] for y in range(8)]
+Black_Attack_Layout = [[Attack_Obj for x in range(8)] for y in range(8)]
+
 # Manages each square of the chessboard based on its background color
 class Board_Settings():
     def __init__(self, canvas, def_color, rectangle):
@@ -72,7 +81,6 @@ class Chess_Managers():
                 print("current_index is %s" % current_index)
                 Piece = getattr(Chess_Pieces, key)
                 self.Chess_items.append(Piece(self.Chess_color, current_index, canvas))
-                #self.Chess_items.append(Chess_Piece(key, self.Chess_color, current_index, canvas))
                 Update_ChessMatrix(self.Chess_items[-1])
 
                 '''

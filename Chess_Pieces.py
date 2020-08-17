@@ -8,16 +8,20 @@ except ImportError:
 import os
 import copy
 
-from Game_Initialization import Chess_Matrix, Board_Colors
+from Game_Initialization import Chess_Matrix, Board_Colors, White_Attack_Layout, Black_Attack_Layout
 Infinite_Movement = 1000
+
+White_King = None
+Black_King = None
 
 
 class Chess_Piece_Movement:
     
     def __init__(self, chess_piece, movements, piece_coordinates):
         self.movement = movements
-        self.chess_piece = chess_piece
+        self.chess_piece = chess_piece    
         self.piece_coordinates = piece_coordinates
+        
         self.movement_coordinates = None
         self.update_move_coordinates(piece_coordinates[:])
         self.OutOfBounds = False
@@ -106,10 +110,13 @@ class Chess_Piece:
         self.Movements_Shown = False
         self.possible_moves = []
         
+        
         if (self.color == "Black"):
             self.negate_coordinates = True
+            self.attack_board = Black_Attack_Layout
         else:
             self.negate_coordinates = False
+            self.attack_board = White_Attack_Layout
             
         self.coordinates = coordinates
         self.canvas = canvas
@@ -169,6 +176,8 @@ class Chess_Piece:
                 potential_move = move.update_move_coordinates()
                 if potential_move:
                     self.possible_moves.append(potential_move)
+                    x,y = potential_move.movement_coordinates
+                    self.attack_board[x][y] = potential_move
                     if potential_move.EnemyHit:
                         break
                 else:
@@ -277,6 +286,8 @@ class Knight(Chess_Piece):
                 potential_move = move.update_move_coordinates()
                 if potential_move:
                     self.possible_moves.append(potential_move)
+                    x,y = potential_move.movement_coordinates
+                    self.attack_board[x][y] = potential_move
                 
         
 class Bishop(Chess_Piece):
@@ -304,6 +315,7 @@ class Queen(Chess_Piece):
 class King(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
         Chess_Piece.__init__(self, "King", color, coordinates, canvas)
+        self.IsChecked = False
         self.add_move("North", [{"North":1}])
         self.add_move("East", [{"East":1}])
         self.add_move("South", [{"South":1}])
@@ -312,5 +324,10 @@ class King(Chess_Piece):
         self.add_move("NorthWest", [{"NorthWest":1}])
         self.add_move("SouthEast", [{"SouthEast":1}])
         self.add_move("SouthWest", [{"SouthWest":1}])
+        
+        if (color == "White"):
+            White_King = self
+        else:
+            Black_King = self
         
         

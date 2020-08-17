@@ -44,6 +44,9 @@ class Toggle_Piece(Frame):
         if (isinstance(chess_piece, Chess_Piece) == False or (self.Players_Colors[self.Player_One_Turn] is not chess_piece.color)):
             if self.current_clicked_piece and self.current_clicked_piece.Movements_Shown and self.current_clicked_piece.Move_Chosen(current_coords[0], current_coords[1]):
                 self.current_clicked_piece.Move_Piece(current_coords[0], current_coords[1])
+                
+                # TODO: Check if the enemy King is checked or not
+                
                 self.Player_One_Turn = not self.Player_One_Turn
                 self.current_clicked_piece = None
                 return self.Players_Colors[self.Player_One_Turn]
