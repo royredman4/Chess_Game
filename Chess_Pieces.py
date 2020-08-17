@@ -1,5 +1,3 @@
-from pip._internal.utils.outdated import SELFCHECK_DATE_FMT
-
 try:
     # for Python2
     from Tkinter import *
@@ -43,6 +41,7 @@ class Chess_Piece_Movement:
                     
         self.movement_coordinates = current_coords
         x,y = current_coords
+        
         if (not self.Is_OutOfBounds()):
             if (not self.Is_Blocked()):
                 return self
@@ -95,7 +94,10 @@ class Chess_Piece_Movement:
         x,y = self.movement_coordinates
         Board_Colors[x][y].Reset_Color()
     
-    
+
+'''
+The default layout for all chess pieces.
+'''
 class Chess_Piece:
     def __init__(self, name, color, coordinates, canvas):
         self.Piece_name = name

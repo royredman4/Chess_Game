@@ -11,18 +11,6 @@ import os
 Piece_count = {"Queen": 1, "King": 1, "Rook": 2, "Bishop": 2, "Knight": 2, "Pawn": 8}
 
 
-'''
-Organized dictionary by limited movements each piece can travel,All numbers
-indicate the distance the piece can travel based on the following ordered
-directions: N, E, S, W, NE, SE, SW, NW.
-'''
-Moves_dictionary = {"Queen":[8,8,8,8,8,8,8,8],
-                    "King":[1,1,1,1,1,1,1,1],
-                    "Rook":[8,8,8,8,0,0,0,0],
-                    "Bishop":[0,0,0,0,8,8,8,8],
-                    "Knight":[2,2,2,2,0,0,0,0],
-                    "Pawn":[1,0,1,0,1,1,1,1]}
-
 # The matrix that manages the Chess piece objects on the board
 Chess_Matrix = [[None for x in range(8)] for y in range(8)]
 
