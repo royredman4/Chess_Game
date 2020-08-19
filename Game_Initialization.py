@@ -17,15 +17,10 @@ Chess_Matrix = [[None for x in range(8)] for y in range(8)]
 # The matrix that manages the chessboard color objects for each piece
 Board_Colors = [[None for x in range(8)] for y in range(8)]
 
-
-class Attack_Obj:
-    def __init__(self):
-        self.Chess_Piece = None
-        self.EnemyMovementsToSpot = []
         
 # Chess Piece attack layouts for each side
-White_Attack_Layout = [[Attack_Obj for x in range(8)] for y in range(8)]
-Black_Attack_Layout = [[Attack_Obj for x in range(8)] for y in range(8)]
+White_Attack_Layout = [[list() for x in range(8)] for y in range(8)]
+Black_Attack_Layout = [[list() for x in range(8)] for y in range(8)]
 
 # Manages each square of the chessboard based on its background color
 class Board_Settings():
@@ -48,6 +43,12 @@ class Chess_Set(Frame):
         self.canvas = canvas
         self.White_Pieces = Chess_Managers("White", self.canvas)
         self.Black_Pieces = Chess_Managers("Black", self.canvas)
+        for chess_piece in self.White_Pieces.Chess_items:
+            chess_piece.update_moves_list()
+            
+        for chess_piece in self.Black_Pieces.Chess_items:
+            chess_piece.update_moves_list()
+        
         Print_Matrix()
 
 
@@ -95,7 +96,7 @@ class Chess_Managers():
                     Update_ChessMatrix(self.Chess_items[-1])
                     
                 x_index += 1
-
+        
 
 # Creates the whole ChessBoard from scratch
 def Draw_ChessBoard(canvas):

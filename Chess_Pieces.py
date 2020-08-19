@@ -114,9 +114,15 @@ class Chess_Piece:
         if (self.color == "Black"):
             self.negate_coordinates = True
             self.attack_board = Black_Attack_Layout
+            self.enemy_board = White_Attack_Layout
+            self.protect_king = Black_King
+            self.enemy_king = White_King
         else:
             self.negate_coordinates = False
             self.attack_board = White_Attack_Layout
+            self.enemy_board = Black_Attack_Layout
+            self.protect_king = White_King
+            self.enemy_king = Black_King
             
         self.coordinates = coordinates
         self.canvas = canvas
@@ -139,8 +145,27 @@ class Chess_Piece:
         print("Deleting Piece Image for {}:{}".format(self.color, self.Piece_name))
         self.canvas.delete(self.img_Obj)
         
+    def update_coordinates_list(self, coordinates):
+        '''
+        TODO: Update Pawns to work correctly. It currently sees forward moves as potential enemy attack moves 
+        and doesn't see diagonal moves as attack moves.
+        
+        TODO: Check if the enemy king has been checked or not after this movement.
+        
+        TODO: Update normal (non-enemy) attack board so your players that were currently blocked may have new movements
+        '''
+        x,y = coordinates
+        old_moves = list()
+        while len(self.enemy_board[x][y]) > 0:
+            old_moves.append(self.enemy_board[x][y].pop())
+        
+        for piece_move in old_moves:
+            piece_move.chess_piece.update_moves_list()
+        
+    
     def Move_Piece(self, new_x, new_y):
         Chess_Matrix[self.coordinates[0]][self.coordinates[1]] = None
+        self.update_coordinates_list(self.coordinates)
         enemy = Chess_Matrix[new_x][new_y]
         if (enemy and enemy.color != self.color):
             enemy.Remove_Piece()
@@ -158,6 +183,7 @@ class Chess_Piece:
         del self.possible_moves[:]
         self.Movements_Shown = False
         
+        self.update_coordinates_list(self.coordinates)
         self.update_moves_list()
     
     def Move_Chosen(self, x,y):
@@ -177,7 +203,7 @@ class Chess_Piece:
                 if potential_move:
                     self.possible_moves.append(potential_move)
                     x,y = potential_move.movement_coordinates
-                    self.attack_board[x][y] = potential_move
+                    self.attack_board[x][y].append(potential_move)
                     if potential_move.EnemyHit:
                         break
                 else:
@@ -201,8 +227,11 @@ class Chess_Piece:
             for movement in piece_movements:
                 for direction in movement:
                     movement[direction] *= -1
-                
-        self.moves[direction].append(Chess_Piece_Movement(self, piece_movements, self.coordinates))
+        
+        movement_option = Chess_Piece_Movement(self, piece_movements, self.coordinates)       
+        self.moves[direction].append(movement_option)
+        
+        
     
     def show_movements(self):
         for move in self.possible_moves:
@@ -223,7 +252,6 @@ class Pawn(Chess_Piece):
         Chess_Piece.__init__(self, "Pawn", color, coordinates, canvas)
 
         self.backup_moves = copy.deepcopy(self.moves)
-        
     
         
     def update_moves_list(self):
@@ -235,13 +263,13 @@ class Pawn(Chess_Piece):
         self.moves = copy.deepcopy(self.backup_moves)
         x,y = self.coordinates
         
-        if (self.enemy_present([x,y+multiplier]) == False):
+        if (8 > y+multiplier >= 0  and self.enemy_present([x,y+multiplier]) == False):
             self.add_move("North", [{"North":1}])
         
-        if (self.enemy_present([x+multiplier,y+multiplier])):
+        if (8 > x+multiplier >= 0 and 8 > y+multiplier >= 0  and self.enemy_present([x+multiplier,y+multiplier])):
             self.add_move("NorthEast", [{"North":1}, {"East":1}])
             
-        if (self.enemy_present([x-multiplier,y+multiplier])):
+        if (8 > x-multiplier >= 0 and 8 > y+multiplier >= 0  and self.enemy_present([x-multiplier,y+multiplier])):
             self.add_move("NorthWest", [{"North":1}, {"West":1}])
         
         
@@ -287,7 +315,7 @@ class Knight(Chess_Piece):
                 if potential_move:
                     self.possible_moves.append(potential_move)
                     x,y = potential_move.movement_coordinates
-                    self.attack_board[x][y] = potential_move
+                    self.attack_board[x][y].append(potential_move)
                 
         
 class Bishop(Chess_Piece):
@@ -297,7 +325,6 @@ class Bishop(Chess_Piece):
         self.add_move("NorthWest", [{"NorthWest":Infinite_Movement}])
         self.add_move("SouthEast", [{"SouthEast":Infinite_Movement}])
         self.add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
-        
         
 class Queen(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
@@ -310,7 +337,6 @@ class Queen(Chess_Piece):
         self.add_move("NorthWest", [{"NorthWest":Infinite_Movement}])
         self.add_move("SouthEast", [{"SouthEast":Infinite_Movement}])
         self.add_move("SouthWest", [{"SouthWest":Infinite_Movement}])
-        
         
 class King(Chess_Piece):
     def __init__(self, color, coordinates, canvas):
@@ -329,5 +355,5 @@ class King(Chess_Piece):
             White_King = self
         else:
             Black_King = self
-        
+
         

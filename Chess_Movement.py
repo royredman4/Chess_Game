@@ -5,7 +5,7 @@ except ImportError:
     # for Python3
     from tkinter import *
 
-from Game_Initialization import Get_Piece
+from Game_Initialization import Get_Piece, White_Attack_Layout, Black_Attack_Layout
 from Chess_Pieces import Chess_Piece
 
 #x_let = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7}
@@ -37,8 +37,20 @@ class Toggle_Piece(Frame):
         print("Current coordinates are %s" % (current_coords))
         chess_piece = Get_Piece(current_coords[0], current_coords[1])
 
-
+        
         print ("It is player %s turn" % (self.Players_Colors[self.Player_One_Turn]))
+        if (self.Player_One_Turn):
+            Attack_Layout = White_Attack_Layout
+            
+        else:
+            Attack_Layout = Black_Attack_Layout
+            
+        for attack_move in Attack_Layout[current_coords[0]][current_coords[1]]:
+            piece_name = attack_move.chess_piece.Piece_name
+            coordinates = attack_move.piece_coordinates
+            print("{} Chess piece, {}(x:{}, y:{}): possible attack spot".format(self.Players_Colors[self.Player_One_Turn], piece_name, coordinates[0], coordinates[1]))
+        
+            
            
         # If it's not the current chess piece, then check if it's the shown movement
         if (isinstance(chess_piece, Chess_Piece) == False or (self.Players_Colors[self.Player_One_Turn] is not chess_piece.color)):
