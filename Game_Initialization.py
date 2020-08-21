@@ -19,8 +19,8 @@ Board_Colors = [[None for x in range(8)] for y in range(8)]
 
         
 # Chess Piece attack layouts for each side
-White_Attack_Layout = [[list() for x in range(8)] for y in range(8)]
-Black_Attack_Layout = [[list() for x in range(8)] for y in range(8)]
+White_Attack_Layout = [[dict() for x in range(8)] for y in range(8)]
+Black_Attack_Layout = [[dict() for x in range(8)] for y in range(8)]
 
 # Manages each square of the chessboard based on its background color
 class Board_Settings():

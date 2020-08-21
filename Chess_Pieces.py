@@ -159,9 +159,18 @@ class Chess_Piece:
         
         '''
         x,y = coordinates
-        old_moves = list()
+        #old_moves = list()
+        combined_list = dict()
         
-        combined_list = self.enemy_board[x][y]
+        combined_list.update(self.enemy_board[x][y])
+        combined_list.update(self.attack_board[x][y])
+        
+        '''
+        if (len(combined_list) > 0):
+            self.attack_board[x][y] = dict()
+            self.enemy_board[x][y] = dict()
+        '''
+        '''
         while len(combined_list) > 0:
             old_moves.append(combined_list.pop())
         
@@ -169,14 +178,26 @@ class Chess_Piece:
         combined_list = self.attack_board[x][y]
         while len(combined_list) > 0:
             old_moves.append(combined_list.pop())
+        '''
         
-        for piece_move in old_moves:
+        for dict_name in combined_list:
+            piece_move = combined_list[dict_name]
             piece_move.chess_piece.update_moves_list()
         
     
     def Move_Piece(self, new_x, new_y):
         Chess_Matrix[self.coordinates[0]][self.coordinates[1]] = None
+        
         self.update_coordinates_list(self.coordinates)
+        
+        '''
+        # This seems to work, but cannot test it at the moment
+        for move in self.possible_moves:
+            x,y = move.movement_coordinates
+            name = "{}{}{}{}".format(self.color[0], self.Piece_name[0], self.coordinates[0], self.coordinates[1])
+            del self.attack_board[x][y][name]
+        '''
+
         enemy = Chess_Matrix[new_x][new_y]
         if (enemy and enemy.color != self.color):
             enemy.Remove_Piece()
@@ -205,16 +226,23 @@ class Chess_Piece:
         return False
     
     def update_moves_list(self):
+        
+            
         del self.possible_moves[:]
         for movement in self.moves:
             if (len(self.moves[movement]) == 0):
                 continue
-            for move in self.moves[movement]:         
+            for move in self.moves[movement]:
+                '''
+                Maybe add a segment to add a variable of a spot that the same player is blocking and 
+                add it to the attack board list
+                '''
                 potential_move = move.update_move_coordinates()
                 if potential_move:
                     self.possible_moves.append(potential_move)
                     x,y = potential_move.movement_coordinates
-                    self.attack_board[x][y].append(potential_move)
+                    name = "{}{}{}{}".format(self.color[0], self.Piece_name[0], self.coordinates[0], self.coordinates[1])
+                    self.attack_board[x][y][name] = potential_move
                     if potential_move.EnemyHit:
                         break
                 else:
@@ -284,14 +312,12 @@ class Pawn(Chess_Piece):
             self.add_move("NorthWest", [{"North":1}, {"West":1}])
         
         
-        if (self.movement_counter > 0):
-            Chess_Piece.update_moves_list(self)
-        else:
+        if self.movement_counter == 0:
             if (self.enemy_present([x,y+(2*multiplier)]) == False and len(self.moves["North"]) == 1):
                 self.add_move("North", [{"North":2}])
                 
-            Chess_Piece.update_moves_list(self)
-            self.moves = copy.deepcopy(self.backup_moves)
+        Chess_Piece.update_moves_list(self)
+        #self.moves = copy.deepcopy(self.backup_moves)
         
 
 class Rook(Chess_Piece):
@@ -317,6 +343,13 @@ class Knight(Chess_Piece):
         self.add_move("West", [{"West":2}, {"South":1}])
         
     def update_moves_list(self):
+        '''
+        # When the Chess_Piece.update_moves_list() method of this works, then remove this commented code
+        for move in self.possible_moves:
+            x,y = move.movement_coordinates
+            name = "{}{}{}{}".format(self.color[0], self.Piece_name[0], self.coordinates[0], self.coordinates[1])
+            del self.attack_board[x][y][name]
+        ''' 
         del self.possible_moves[:]
         for movement in self.moves:
             if (len(self.moves[movement]) == 0):
@@ -326,7 +359,8 @@ class Knight(Chess_Piece):
                 if potential_move:
                     self.possible_moves.append(potential_move)
                     x,y = potential_move.movement_coordinates
-                    self.attack_board[x][y].append(potential_move)
+                    name = "{}{}{}{}".format(self.color[0], self.Piece_name[0], self.coordinates[0], self.coordinates[1])
+                    self.attack_board[x][y][name] = potential_move
                 
         
 class Bishop(Chess_Piece):

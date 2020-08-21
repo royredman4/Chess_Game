@@ -45,7 +45,8 @@ class Toggle_Piece(Frame):
         else:
             Attack_Layout = Black_Attack_Layout
             
-        for attack_move in Attack_Layout[current_coords[0]][current_coords[1]]:
+        for attack_name in Attack_Layout[current_coords[0]][current_coords[1]]:
+            attack_move = Attack_Layout[current_coords[0]][current_coords[1]][attack_name]
             piece_name = attack_move.chess_piece.Piece_name
             coordinates = attack_move.piece_coordinates
             print("{} Chess piece, {}(x:{}, y:{}): possible attack spot".format(self.Players_Colors[self.Player_One_Turn], piece_name, coordinates[0], coordinates[1]))
