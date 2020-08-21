@@ -152,12 +152,23 @@ class Chess_Piece:
         
         TODO: Check if the enemy king has been checked or not after this movement.
         
-        TODO: Update normal (non-enemy) attack board so your players that were currently blocked may have new movements
+         (In progress) TODO: Update normal (non-enemy) attack board so your players that were currently blocked may have new movements
+        
+        TODO: Consider using a dictionary to prevent the same object being added multiple times in the list
+        ex: "White_Pawn_x3_y5"
+        
         '''
         x,y = coordinates
         old_moves = list()
-        while len(self.enemy_board[x][y]) > 0:
-            old_moves.append(self.enemy_board[x][y].pop())
+        
+        combined_list = self.enemy_board[x][y]
+        while len(combined_list) > 0:
+            old_moves.append(combined_list.pop())
+        
+        
+        combined_list = self.attack_board[x][y]
+        while len(combined_list) > 0:
+            old_moves.append(combined_list.pop())
         
         for piece_move in old_moves:
             piece_move.chess_piece.update_moves_list()
